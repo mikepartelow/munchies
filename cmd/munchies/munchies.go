@@ -6,6 +6,10 @@ import (
 	nutrient "mp/munchies/pkg/nutrient"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -13,6 +17,7 @@ const (
 )
 
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	// FIXME: CLI
 	//
 	//  ./munchies 'oats' : display list of foods with "oats" in the description, case insensitive
@@ -55,6 +60,6 @@ func main() {
 		for _, food := range foods {
 			fmt.Println(food.Description)
 		}
-		fmt.Printf("Found %d foods.\n", len(foods))
+		log.Info().Msgf("Found %d foods.\n", len(foods))
 	}
 }

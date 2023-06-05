@@ -45,13 +45,14 @@ func main() {
 
 	if len(foods) == 1 {
 		food := foods[0]
+		nf := nutrient.NewFilter()
 		fmt.Println(food.Description + ": " + portion)
 		fmt.Println(strings.Repeat("-", 80))
 		// FIXME: template
 		for _, nut := range food.FoodNutrients {
 			// FIXME: --all-nutrients
 			// FIXME: less awkward overall
-			if nutrient.ShouldDisplay(nut.Nutrient.Name) {
+			if nf.ShouldDisplay(nut.Nutrient.Name) {
 				fmt.Printf("  %40s: %.2f%s\n", nut.Nutrient.Name, nut.Amount, nut.Nutrient.UnitName)
 			}
 		}

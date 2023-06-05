@@ -6,10 +6,15 @@ type Nutrient struct {
 	UnitName string `json:"unitName"`
 }
 
-func ShouldDisplay(nut string) bool {
-	// FIXME: use a map
-	// FIXME: if we have Energy in kcal, don't display Energy in kJ
-	want := []string{
+type Filter struct {
+	keepNames map[string]struct{}
+}
+
+func NewFilter() Filter {
+	f := Filter{}
+
+	f.keepNames = make(map[string]struct{})
+	keepers := []string{
 		"Cholesterol",
 		"Caffeine",
 		"Sugars, total including NLEA",
@@ -25,11 +30,17 @@ func ShouldDisplay(nut string) bool {
 		"Energy (Atwater Specific Factors)",
 	}
 
-	for _, w := range want {
-		if nut == w {
-			return true
-		}
+	for _, keeper := range keepers {
+		f.keepNames[keeper] = struct{}{}
 	}
 
-	return false
+	return f
+}
+
+func (f *Filter) ShouldDisplay(nut string) bool {
+	// FIXME: if we have Energy in kcal, don't display Energy in kJ
+
+	_, ok := f.keepNames[nut]
+
+	return ok
 }

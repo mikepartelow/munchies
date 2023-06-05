@@ -3,6 +3,7 @@ module mp/munchies
 go 1.20
 
 require (
+	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/rs/zerolog v1.29.1 // indirect

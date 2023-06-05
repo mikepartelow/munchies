@@ -1,5 +1,5 @@
 all:
-	@go build ./cmd/...
+	@go build -o . ./cmd/...
 
 clean:
 	@rm -f ./munchies

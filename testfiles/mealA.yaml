@@ -1,0 +1,8 @@
+kind: meal/v1
+foods:
+- name: Game meat, goat, cooked, roasted
+  amount: 2.0
+  unitName: g
+- name: Sauce, steak, tomato based
+  amount: 1.5
+  unitName: ounce

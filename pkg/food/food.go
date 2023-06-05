@@ -38,6 +38,16 @@ func (fin Foods) Filter(term string) (fout Foods) {
 	return
 }
 
+func (fin Foods) Match(term string) *Food {
+	for _, food := range fin {
+		if strings.EqualFold(food.Description, term) {
+			return &food
+		}
+	}
+
+	return nil
+}
+
 func MustRead(dataRoot string) (foods Foods) {
 	filenames := []string{
 		"foundationDownload.json",

@@ -12,6 +12,32 @@ import (
 // external interface
 type Meal struct {
 	Portions Portions
+
+	foodNutrients []food.FoodNutrient
+}
+
+func (m *Meal) FoodNutrients() []food.FoodNutrient {
+	if m.foodNutrients == nil {
+		fnset := make(map[int]food.FoodNutrient)
+
+		for _, p := range m.Portions {
+			for _, pffn := range p.Food.FoodNutrients {
+				id := pffn.Nutrient.Id
+				if fn, ok := fnset[id]; ok {
+					fn.Amount += pffn.Amount
+					fnset[id] = fn
+				} else {
+					fnset[id] = pffn
+				}
+			}
+		}
+
+		for _, fn := range fnset {
+			m.foodNutrients = append(m.foodNutrients, fn)
+		}
+	}
+
+	return m.foodNutrients
 }
 
 type Portions []Portion

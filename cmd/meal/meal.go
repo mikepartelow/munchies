@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"mp/munchies/pkg/food"
 	"mp/munchies/pkg/meal"
+	"mp/munchies/pkg/nutrient"
 	"os"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -32,4 +35,17 @@ func main() {
 	for _, p := range meal.Portions {
 		fmt.Printf("%.02f %s %s\n", p.Amount, p.UnitName, p.Food.Description)
 	}
+	fmt.Println(strings.Repeat("-", 80))
+
+	nf := nutrient.NewFilter()
+
+	foodNutrients := meal.FoodNutrients()
+	sort.Sort(food.ByNutrientName(foodNutrients))
+
+	for _, nut := range foodNutrients {
+		if nf.ShouldDisplay(nut.Nutrient.Name) {
+			fmt.Printf("  %40s: %.2f%s\n", nut.Nutrient.Name, nut.Amount, nut.Nutrient.UnitName)
+		}
+	}
+
 }

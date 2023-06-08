@@ -5,6 +5,7 @@ import (
 	food "mp/munchies/pkg/food"
 	nutrient "mp/munchies/pkg/nutrient"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -44,12 +45,15 @@ func main() {
 	}
 
 	if len(foods) == 1 {
-		food := foods[0]
+		f := foods[0]
 		nf := nutrient.NewFilter()
-		fmt.Println(food.Description + ": " + portion)
+		fmt.Println(f.Description + ": " + portion)
 		fmt.Println(strings.Repeat("-", 80))
 		// FIXME: template
-		for _, nut := range food.FoodNutrients {
+
+		sort.Sort(food.ByNutrientName(f.FoodNutrients))
+
+		for _, nut := range f.FoodNutrients {
 			// FIXME: --all-nutrients
 			// FIXME: less awkward overall
 			if nf.ShouldDisplay(nut.Nutrient.Name) {

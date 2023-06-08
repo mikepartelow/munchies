@@ -26,6 +26,12 @@ type FoodNutrient struct {
 	Amount   float32           `json:"amount"`
 }
 
+type ByNutrientName []FoodNutrient
+
+func (n ByNutrientName) Len() int           { return len(n) }
+func (n ByNutrientName) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func (n ByNutrientName) Less(i, j int) bool { return n[i].Nutrient.Name < n[j].Nutrient.Name }
+
 func (fin Foods) Filter(term string) (fout Foods) {
 	term = strings.ToLower(term)
 

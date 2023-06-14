@@ -17,21 +17,45 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, "0000", version)
 }
 
-func TestNutrient(t *testing.T) {
-	dB, err := db.New(db.IN_MEMORY)
-	assert.NoError(t, err)
-	defer dB.Close()
-	assert.NoError(t, dB.Migrate())
+func TestRecord(t *testing.T) {
+	// test that ID, CreatedAt, UpdatedAt are populated
+	t.Skip("FIXME")
+	// assert.Equal(t, "butter", nuts[0].ID)
+	// assert.Equal(t, "butter", nuts[0].CreatedAt)
+	// assert.Equal(t, "butter", nuts[0].UpdatedAt)
+}
 
-	err = db.Nutrient{
-		Name: "butter",
+func TestUnit(t *testing.T) {
+	dB := mustInitDb(t)
+	defer dB.Close()
+
+	wantName := "truckload"
+
+	err := db.Unit{
+		Name: wantName,
+	}.WriteTo(dB)
+	assert.NoError(t, err)
+
+	var unit db.Unit
+	err = unit.ReadFrom(dB)
+	assert.NoError(t, err)
+	assert.Equal(t, wantName, unit.Name)
+}
+func TestNutrient(t *testing.T) {
+	dB := mustInitDb(t)
+	defer dB.Close()
+
+	wantName := "butter"
+
+	err := db.Nutrient{
+		Name: wantName,
 	}.WriteTo(dB)
 	assert.NoError(t, err)
 
 	var nut db.Nutrient
 	err = nut.ReadFrom(dB)
 	assert.NoError(t, err)
-	assert.Equal(t, "butter", nut.Name)
+	assert.Equal(t, wantName, nut.Name)
 }
 
 func TestNutrients(t *testing.T) {
@@ -41,20 +65,18 @@ func TestNutrients(t *testing.T) {
 		"hydrogen",
 	}
 
-	dB, err := db.New(db.IN_MEMORY)
-	assert.NoError(t, err)
+	dB := mustInitDb(t)
 	defer dB.Close()
-	assert.NoError(t, dB.Migrate())
 
 	for _, name := range names {
-		err = db.Nutrient{
+		err := db.Nutrient{
 			Name: name,
 		}.WriteTo(dB)
 		assert.NoError(t, err)
 	}
 
 	var nuts db.Nutrients
-	err = nuts.ReadFrom(dB)
+	err := nuts.ReadFrom(dB)
 	assert.NoError(t, err)
 	assert.Len(t, nuts, 3)
 
@@ -63,10 +85,12 @@ func TestNutrients(t *testing.T) {
 	}
 }
 
-func TestRecord(t *testing.T) {
-	// test that ID, CreatedAt, UpdatedAt are populated
-	t.Skip("FIXME")
-	// assert.Equal(t, "butter", nuts[0].ID)
-	// assert.Equal(t, "butter", nuts[0].CreatedAt)
-	// assert.Equal(t, "butter", nuts[0].UpdatedAt)
+func mustInitDb(t *testing.T) *db.Database {
+	t.Helper()
+
+	dB, err := db.New(db.IN_MEMORY)
+	assert.NoError(t, err)
+	assert.NoError(t, dB.Migrate())
+
+	return dB
 }

@@ -41,6 +41,36 @@ func TestUnit(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, wantName, unit.Name)
 }
+
+func TestUnits(t *testing.T) {
+	names := []string{
+		"truckload",
+		"planeload",
+		"boatload",
+		"megaparsec",
+		"nanometer",
+	}
+
+	dB := mustInitDb(t)
+	defer dB.Close()
+
+	for _, name := range names {
+		err := db.Unit{
+			Name: name,
+		}.WriteTo(dB)
+		assert.NoError(t, err)
+	}
+
+	var units db.Units
+	err := units.ReadFrom(dB)
+	assert.NoError(t, err)
+	assert.Len(t, units, 5)
+
+	for i, _ := range names {
+		assert.Equal(t, names[i], units[i].Name)
+	}
+}
+
 func TestNutrient(t *testing.T) {
 	dB := mustInitDb(t)
 	defer dB.Close()

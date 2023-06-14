@@ -1,0 +1,7 @@
+CREATE TABLE _meta (
+    version TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO _meta(version) VALUES('0000');

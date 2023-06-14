@@ -10,13 +10,18 @@ import (
 func TestNew(t *testing.T) {
 	dB, err := db.New(db.IN_MEMORY)
 	assert.NoError(t, err)
-	dB.Close()
+	defer dB.Close()
+
+	version, err := dB.Version()
+	assert.NoError(t, err)
+	assert.Equal(t, "0000", version)
 }
 
 func TestNutrient(t *testing.T) {
 	dB, err := db.New(db.IN_MEMORY)
 	assert.NoError(t, err)
 	defer dB.Close()
+	assert.NoError(t, dB.Migrate())
 
 	err = db.Nutrient{
 		Name: "butter",
@@ -39,6 +44,7 @@ func TestNutrients(t *testing.T) {
 	dB, err := db.New(db.IN_MEMORY)
 	assert.NoError(t, err)
 	defer dB.Close()
+	assert.NoError(t, dB.Migrate())
 
 	for _, name := range names {
 		err = db.Nutrient{
@@ -55,7 +61,6 @@ func TestNutrients(t *testing.T) {
 	for i, _ := range names {
 		assert.Equal(t, names[i], nuts[i].Name)
 	}
-
 }
 
 func TestRecord(t *testing.T) {

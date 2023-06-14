@@ -5,6 +5,7 @@ import (
 	"mp/munchies/pkg/food"
 	"mp/munchies/pkg/meal"
 	"mp/munchies/pkg/nutrient"
+	"mp/munchies/pkg/usda"
 	"os"
 	"sort"
 	"strings"
@@ -18,10 +19,22 @@ const (
 	PATH_TO_DATA = "./USDA"
 )
 
+// - SQLITE DB
+// - URFAVE CLI
+//   ./munchies import /path/to/usda
+//   ./munchies units
+//   ./munchies meal /path/to/meal
+// - TESTS
+// - TUI
+
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 
-	foods := food.MustRead(PATH_TO_DATA)
+	foods, err := usda.MustRead(PATH_TO_DATA)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading USDA JSON files at %q.", PATH_TO_DATA)
+		log.Fatal().Err(err).Send()
+	}
 
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <path to meal.yaml>", os.Args[0])
@@ -37,7 +50,7 @@ func main() {
 	}
 	fmt.Println(strings.Repeat("-", 80))
 
-	nf := nutrient.NewFilter()
+	nf := nutrient.NewFilter(nutrient.NUTRIENT_FILTER_DEFAULTS)
 
 	foodNutrients := meal.FoodNutrients()
 	sort.Sort(food.ByNutrientName(foodNutrients))

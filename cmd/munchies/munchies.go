@@ -4,6 +4,7 @@ import (
 	"fmt"
 	food "mp/munchies/pkg/food"
 	nutrient "mp/munchies/pkg/nutrient"
+	"mp/munchies/pkg/usda"
 	"os"
 	"sort"
 	"strings"
@@ -30,7 +31,11 @@ func main() {
 	// check out the portion conversions: cat FoodData_Central_sr_legacy_food_json_2021-10-28.json| jq -C ".SRLegacyFoods[] |  select(.description==\"Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)\") | .foodPortions"
 
 	// FIXME: food.MustRead("path/to/all/data") let MustRead figure out which datasets to load
-	foods := food.MustRead(PATH_TO_DATA)
+	foods, err := usda.MustRead(PATH_TO_DATA)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading USDA JSON files at %q.", PATH_TO_DATA)
+		log.Fatal().Err(err).Send()
+	}
 
 	portion := "100g" // FIXME: this appears to be an assumption of the data, but probably isn't
 
@@ -46,7 +51,7 @@ func main() {
 
 	if len(foods) == 1 {
 		f := foods[0]
-		nf := nutrient.NewFilter()
+		nf := nutrient.NewFilter(nutrient.NUTRIENT_FILTER_DEFAULTS)
 		fmt.Println(f.Description + ": " + portion)
 		fmt.Println(strings.Repeat("-", 80))
 		// FIXME: template

@@ -1,10 +1,7 @@
 package food
 
 import (
-	"encoding/json"
 	"mp/munchies/pkg/nutrient"
-	"os"
-	"path"
 	"strings"
 )
 
@@ -52,37 +49,4 @@ func (fin Foods) Match(term string) *Food {
 	}
 
 	return nil
-}
-
-func MustRead(dataRoot string) (foods Foods) {
-	filenames := []string{
-		"foundationDownload.json",
-		"FoodData_Central_sr_legacy_food_json_2021-10-28.json",
-	}
-
-	for _, filename := range filenames {
-		dataPath := path.Join(dataRoot, filename)
-		file, err := os.Open(dataPath)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-
-		var foodsMap map[string]Foods
-
-		err = json.NewDecoder(file).Decode(&foodsMap)
-		if err != nil {
-			panic(err)
-		}
-
-		if len(foodsMap) > 1 {
-			panic("whoops")
-		}
-
-		for _, v := range foodsMap {
-			foods = append(foods, v...)
-		}
-	}
-
-	return
 }

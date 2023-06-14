@@ -1,20 +1,15 @@
 package nutrient
 
+import "strings"
+
 type Nutrient struct {
 	Id       int    `json:"id"`
 	Name     string `json:"name"`
 	UnitName string `json:"unitName"`
 }
 
-type Filter struct {
-	keepNames map[string]struct{}
-}
-
-func NewFilter() Filter {
-	f := Filter{}
-
-	f.keepNames = make(map[string]struct{})
-	keepers := []string{
+var (
+	NUTRIENT_FILTER_DEFAULTS = []string{
 		"Cholesterol",
 		"Caffeine",
 		"Sugars, total including NLEA",
@@ -29,9 +24,19 @@ func NewFilter() Filter {
 		"Energy (Atwater General Factors)",
 		"Energy (Atwater Specific Factors)",
 	}
+)
+
+type Filter struct {
+	keepNames map[string]struct{}
+}
+
+func NewFilter(keepers []string) Filter {
+	f := Filter{}
+
+	f.keepNames = make(map[string]struct{})
 
 	for _, keeper := range keepers {
-		f.keepNames[keeper] = struct{}{}
+		f.keepNames[strings.ToLower(keeper)] = struct{}{}
 	}
 
 	return f
@@ -40,7 +45,7 @@ func NewFilter() Filter {
 func (f *Filter) ShouldDisplay(nut string) bool {
 	// FIXME: if we have Energy in kcal, don't display Energy in kJ
 
-	_, ok := f.keepNames[nut]
+	_, ok := f.keepNames[strings.ToLower(nut)]
 
 	return ok
 }

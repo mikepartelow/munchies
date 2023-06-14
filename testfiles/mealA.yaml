@@ -1,8 +1,20 @@
 kind: meal/v1
 foods:
-- name: Game meat, goat, cooked, roasted
-  amount: 2.0
-  unitName: g
-- name: Sauce, steak, tomato based
-  amount: 1.5
+# - name: Mangos, raw
+#   amount: 8
+#   unitName: ounce
+# - name: Yogurt, Greek, plain, nonfat
+#   amount: 4
+#   unitName: ounce
+- name: Oats, whole grain, rolled, old fashioned
+  amount: 6
   unitName: ounce
+# - name: Bananas, dehydrated, or banana powder
+#   amount: 2
+#   unitName: ounce
+# - name: Seeds, flaxseed
+#   amount: 20
+#   unitName: g
+# - name: Cereals ready-to-eat, POST, GRAPE-NUTS Cereal
+#   amount: 2
+#   unitName: ounce

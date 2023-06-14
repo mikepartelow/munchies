@@ -4,6 +4,7 @@ import (
 	"mp/munchies/pkg/food"
 	"os"
 
+	u "github.com/bcicen/go-units"
 	"github.com/rs/zerolog/log"
 
 	"github.com/go-yaml/yaml"
@@ -17,18 +18,28 @@ type Meal struct {
 }
 
 func (m *Meal) FoodNutrients() []food.FoodNutrient {
+	panic("insufficient")
+
+	// some essential nutrients (like Energy) are recorded differently for different foods
+	// e.g. Oats, whole grain, rolled, old fashioned has no Energy, but has Atwater Specific/General values that must be used instead
+	//  so:
+	//  - define the nutrients that matter (Fiber, Energy, Fat, etc.)
+	//  - compute them if not supplied directly
+	//    - kcal instead of kJ
+	//    - use Atwater General/Specific for Energy as needed (like in Oats, whole grain, rolled, old fashioned)
+	//  - filter out the rest (optionally)
 	if m.foodNutrients == nil {
 		fnset := make(map[int]food.FoodNutrient)
 
 		for _, p := range m.Portions {
 			for _, pffn := range p.Food.FoodNutrients {
 				id := pffn.Nutrient.Id
+				pffn.Amount *= scale(convert(p))
 				if fn, ok := fnset[id]; ok {
 					fn.Amount += pffn.Amount
-					fnset[id] = fn
-				} else {
-					fnset[id] = pffn
+					pffn = fn
 				}
+				fnset[id] = pffn
 			}
 		}
 
@@ -38,6 +49,29 @@ func (m *Meal) FoodNutrients() []food.FoodNutrient {
 	}
 
 	return m.foodNutrients
+}
+
+// convert converts Portion p into grams
+func convert(p Portion) Portion {
+	switch p.UnitName {
+	case "g":
+		break
+	case "ounce", "oz":
+		p.UnitName = "g"
+		p.Amount = float32(u.NewValue(float64(p.Amount), u.Ounce).MustConvert(u.Gram).Float())
+	default:
+		panic("uknown unit: " + p.UnitName)
+	}
+
+	return p
+}
+
+// scale returns a scaling factor for a nutrient Amount given that all nutrient values are for 100g of Food.
+func scale(p Portion) float32 {
+	if p.UnitName != "g" {
+		panic("unknown unit: " + p.UnitName)
+	}
+	return p.Amount / 100.0
 }
 
 type Portions []Portion

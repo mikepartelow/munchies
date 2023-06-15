@@ -18,7 +18,7 @@ type Meal struct {
 }
 
 func (m *Meal) FoodNutrients() []food.FoodNutrient {
-	panic("insufficient")
+	// FIXME: panic("insufficient")
 
 	// some essential nutrients (like Energy) are recorded differently for different foods
 	// e.g. Oats, whole grain, rolled, old fashioned has no Energy, but has Atwater Specific/General values that must be used instead

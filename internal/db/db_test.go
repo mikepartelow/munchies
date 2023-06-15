@@ -66,7 +66,7 @@ func TestUnits(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, units, 5)
 
-	for i, _ := range names {
+	for i := range names {
 		assert.Equal(t, names[i], units[i].Name)
 	}
 }
@@ -110,7 +110,7 @@ func TestNutrients(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, nuts, 3)
 
-	for i, _ := range names {
+	for i := range names {
 		assert.Equal(t, names[i], nuts[i].Name)
 	}
 }

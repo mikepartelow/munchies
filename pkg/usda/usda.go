@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mp/munchies/pkg/food"
 	"os"
+	"path"
 )
 
 var _JSON_FILENAMES = []string{
@@ -15,6 +16,7 @@ var _JSON_FILENAMES = []string{
 func MustRead(root string) (food.Foods, error) {
 	var foods food.Foods
 	for _, filename := range _JSON_FILENAMES {
+		filename := path.Join(root, filename)
 		file, err := os.Open(filename)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't open %q: %w", filename, err)

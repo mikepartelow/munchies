@@ -30,7 +30,7 @@ func main() {
 		}
 	}
 
-	for unit, _ := range units {
+	for unit := range units {
 		fmt.Println(unit)
 	}
 }

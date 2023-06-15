@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"mp/munchies/internal/db"
+	"mp/munchies/pkg/food"
 	"mp/munchies/pkg/usda"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -70,6 +72,9 @@ func doFind(term string) error {
 	return nil
 }
 
+type unitSet map[string]struct{}
+type nutrientSet map[string]struct{}
+
 func doIngest(pathToUSDAJson, pathToDatabase string) error {
 	foods, err := usda.MustRead(pathToUSDAJson)
 	if err != nil {
@@ -89,35 +94,50 @@ func doIngest(pathToUSDAJson, pathToDatabase string) error {
 
 	defer dB.Close()
 
-	units := make(map[string]struct{})
-	nutrients := make(map[string]struct{})
+	units := make(unitSet)
+	nutrients := make(nutrientSet)
 
 	for _, food := range foods {
 		for _, fnut := range food.FoodNutrients {
-			uname := fnut.Nutrient.UnitName
-			if _, ok := units[uname]; !ok {
-				if err := (db.Unit{
-					Name: uname,
-				}.WriteTo(dB)); err != nil {
-					log.Error().Err(err).Send()
-					return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", uname, pathToUSDAJson, err), 1)
-				}
-				units[uname] = struct{}{}
+			if err := doUnit(fnut, units, dB); err != nil {
+				return err
 			}
-
-			// DRY: so error prone!
-			nname := fnut.Nutrient.Name
-
-			if _, ok := nutrients[nname]; !ok {
-				if err := (db.Nutrient{
-					Name: nname,
-				}.WriteTo(dB)); err != nil {
-					log.Error().Err(err).Send()
-					return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", nname, pathToUSDAJson, err), 1)
-				}
-				nutrients[nname] = struct{}{}
+			if err := doNutrient(fnut, nutrients, dB); err != nil {
+				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+// FIXME: extract, publish, unit test
+func doUnit(fnut food.FoodNutrient, units unitSet, dB *db.Database) error {
+	name := fnut.Nutrient.UnitName
+	if _, ok := units[name]; !ok {
+		if err := (db.Unit{
+			Name: strings.TrimSpace(name),
+		}.WriteTo(dB)); err != nil {
+			log.Error().Err(err).Send()
+			return cli.Exit(fmt.Sprintf("Error writing unit %q to database: %s.", name, err), 1)
+		}
+		units[name] = struct{}{}
+	}
+
+	return nil
+}
+
+// FIXME: extract, publish, unit test
+func doNutrient(fnut food.FoodNutrient, nutrients nutrientSet, dB *db.Database) error {
+	name := fnut.Nutrient.Name
+	if _, ok := nutrients[name]; !ok {
+		if err := (db.Nutrient{
+			Name: strings.TrimSpace(name),
+		}.WriteTo(dB)); err != nil {
+			log.Error().Err(err).Send()
+			return cli.Exit(fmt.Sprintf("Error writing unit %q to database: %s.", name, err), 1)
+		}
+		nutrients[name] = struct{}{}
 	}
 
 	return nil

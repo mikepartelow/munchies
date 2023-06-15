@@ -12,9 +12,14 @@ func TestFood(t *testing.T) {
 	defer dB.Close()
 
 	wantName := "butter"
+	wantNutrients := db.Nutrients{
+		{Name: "beta broccolitene"},
+		{Name: "sodium"},
+	}
 
 	err := db.Food{
-		Name: wantName,
+		Name:      wantName,
+		Nutrients: wantNutrients,
 	}.WriteTo(dB)
 	assert.NoError(t, err)
 
@@ -22,31 +27,55 @@ func TestFood(t *testing.T) {
 	err = nut.ReadFrom(dB)
 	assert.NoError(t, err)
 	assert.Equal(t, wantName, nut.Name)
+	assert.Equal(t, wantNutrients, nut.Nutrients)
 }
 
 func TestFoods(t *testing.T) {
-	names := []string{
-		"swamp gas",
-		"potatoes",
-		"molybdenum",
+	want := []struct {
+		Name      string
+		Nutrients db.Nutrients
+	}{
+		{
+			Name: "swamp gas",
+			Nutrients: db.Nutrients{
+				{Name: "beta broccolitene"},
+				{Name: "sodium"},
+			},
+		},
+		{
+			Name: "potatoes",
+			Nutrients: db.Nutrients{
+				{Name: "shells"},
+			},
+		},
+
+		{
+			Name: "molybdenum",
+			Nutrients: db.Nutrients{
+				{Name: "iron"},
+				{Name: "cinnamon"},
+			},
+		},
 	}
 
 	dB := mustInitDb(t)
 	defer dB.Close()
 
-	for _, name := range names {
+	for _, w := range want {
 		err := db.Food{
-			Name: name,
+			Name:      w.Name,
+			Nutrients: w.Nutrients,
 		}.WriteTo(dB)
 		assert.NoError(t, err)
 	}
 
-	var nuts db.Foods
-	err := nuts.ReadFrom(dB)
+	var foods db.Foods
+	err := foods.ReadFrom(dB)
 	assert.NoError(t, err)
-	assert.Len(t, nuts, 3)
+	assert.Len(t, foods, 3)
 
-	for i := range names {
-		assert.Equal(t, names[i], nuts[i].Name)
+	for i := range want {
+		assert.Equal(t, want[i].Name, foods[i].Name)
+		assert.Equal(t, want[i].Nutrients, foods[i].Nutrients)
 	}
 }

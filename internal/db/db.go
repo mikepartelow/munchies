@@ -19,6 +19,8 @@ type Database struct {
 const (
 	// IN_MEMORY, passed to New(), creates an in-memory database
 	IN_MEMORY = ":memory:"
+
+	DB_PATH = "./munchies.sqlite"
 )
 
 //go:embed sql
@@ -27,16 +29,10 @@ var sqlFs embed.FS
 func New(filename string) (*Database, error) {
 	db, err := sql.Open("sqlite3", filename)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create database %q: %w", filename, err)
+		return nil, fmt.Errorf("couldn't create/open database %q: %w", filename, err)
 	}
 
-	if err := applySql("0000_meta.sql", db); err != nil {
-		return nil, fmt.Errorf("couldn't create meta table: %w", err)
-	}
-
-	return &Database{
-		db: db,
-	}, nil
+	return &Database{db: db}, nil
 }
 
 func (db Database) Version() (string, error) {
@@ -62,9 +58,10 @@ func (db Database) Version() (string, error) {
 }
 
 func (db *Database) Migrate() error {
+	var version string
 	version, err := db.Version()
 	if err != nil {
-		return fmt.Errorf("couldn't read db version: %w", err)
+		version = ""
 	}
 
 	entries, err := sqlFs.ReadDir("sql")

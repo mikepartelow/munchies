@@ -1,6 +1,8 @@
 package meal
 
 import (
+	"fmt"
+	"mp/munchies/internal/db"
 	"mp/munchies/pkg/food"
 	"os"
 
@@ -97,36 +99,45 @@ type mealFood struct {
 	UnitName string  `yaml:"unitName"`
 }
 
-func MustRead(mealPath string, foods food.Foods) Meal {
+func MustRead(mealPath string, foods food.Foods) *Meal {
+	meal, err := Read(mealPath, nil)
+	if err != nil {
+		log.Panic().Err(err).Send()
+	}
+
+	return meal
+}
+
+func Read(mealPath string, dB *db.Database) (*Meal, error) {
 	file, err := os.Open(mealPath)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("couldn't open meal %q: %w", mealPath, err)
 	}
 	defer file.Close()
 
 	var yamlMeal meal
 	err = yaml.NewDecoder(file).Decode(&yamlMeal)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("couldn't decode meal %q: %w", mealPath, err)
 	}
 
 	if yamlMeal.Kind != "meal/v1" {
-		log.Fatal().Msgf("uknown meal kind: %q", yamlMeal.Kind)
+		return nil, fmt.Errorf("unknown meal kind: %q", yamlMeal.Kind)
 	}
 
 	var meal Meal
-	for _, f := range yamlMeal.Foods {
-		food := foods.Match(f.Name)
-		if food == nil {
-			log.Fatal().Msgf("couldn't match food %q", f.Name)
-			break
-		}
-		meal.Portions = append(meal.Portions, Portion{
-			Food:     *food,
-			Amount:   f.Amount,
-			UnitName: f.UnitName,
-		})
-	}
+	// for _, f := range yamlMeal.Foods {
+	// 	food := foods.Match(f.Name)
+	// 	if food == nil {
+	// 		log.Error().Msgf("couldn't match food %q", f.Name)
+	// 		return nil, fmt.Errorf("unknown food: %q", f.Name)
+	// 	}
+	// 	meal.Portions = append(meal.Portions, Portion{
+	// 		Food:     *food,
+	// 		Amount:   f.Amount,
+	// 		UnitName: f.UnitName,
+	// 	})
+	// }
 
-	return meal
+	return &meal, nil
 }

@@ -33,21 +33,21 @@ type unitSet map[string]struct{}
 type nutrientSet map[string]struct{}
 
 // FIXME: extract, publish, unit test
-func doIngest(pathToUSDAJson string) error {
-	foods, err := usda.MustRead(pathToUSDAJson)
+func doIngest(usdaJsonPath string) error {
+	foods, err := usda.MustRead(usdaJsonPath)
 	if err != nil {
 		log.Error().Err(err).Send()
-		return cli.Exit(fmt.Sprintf("Error reading USDA JSON files at %q: %s.", pathToUSDAJson, err), 1)
+		return cli.Exit(fmt.Sprintf("Error reading USDA JSON files at %q: %s.", usdaJsonPath, err), 1)
 	}
-	_ = os.RemoveAll(db.DB_PATH)
-	dB, err := db.New(db.DB_PATH)
+	_ = os.RemoveAll(getDbPath())
+	dB, err := db.New(getDbPath())
 	if err != nil {
 		log.Error().Err(err).Send()
-		return cli.Exit(fmt.Sprintf("Error creating database %q: %s.", db.DB_PATH, err), 1)
+		return cli.Exit(fmt.Sprintf("Error creating database %q: %s.", getDbPath(), err), 1)
 	}
 	if err := dB.Migrate(); err != nil {
 		log.Error().Err(err).Send()
-		return cli.Exit(fmt.Sprintf("Error migrating database %q: %s.", db.DB_PATH, err), 1)
+		return cli.Exit(fmt.Sprintf("Error migrating database %q: %s.", getDbPath(), err), 1)
 	}
 
 	defer dB.Close()
@@ -77,7 +77,7 @@ func doUnit(fnut food.FoodNutrient, units unitSet, dB *db.Database) error {
 			Name: strings.TrimSpace(name),
 		}.WriteTo(dB)); err != nil {
 			log.Error().Err(err).Send()
-			return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", name, db.DB_PATH, err), 1)
+			return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", name, getDbPath(), err), 1)
 		}
 		units[name] = struct{}{}
 	}
@@ -93,7 +93,7 @@ func doNutrient(fnut food.FoodNutrient, nutrients nutrientSet, dB *db.Database) 
 			Name: strings.TrimSpace(name),
 		}.WriteTo(dB)); err != nil {
 			log.Error().Err(err).Send()
-			return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", name, db.DB_PATH, err), 1)
+			return cli.Exit(fmt.Sprintf("Error writing unit %q to database %q: %s.", name, getDbPath(), err), 1)
 		}
 		nutrients[name] = struct{}{}
 	}

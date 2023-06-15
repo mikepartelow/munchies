@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"mp/munchies/internal/db"
 	"os"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+)
+
+const (
+	DB_PATH = "./munchies.sqlite"
 )
 
 func main() {
@@ -21,6 +26,7 @@ func main() {
 			makeFindCommand(),
 			makeIngestCommand(),
 			makeNutrientsCommand(),
+			makeMealCommand(),
 			makeUnitsCommand(),
 		},
 	}
@@ -30,4 +36,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error: %s", err)
 		os.Exit(1)
 	}
+}
+
+func getDbPath() string {
+	return DB_PATH
+}
+
+func getDb() (*db.Database, error) {
+	return db.New(getDbPath())
 }

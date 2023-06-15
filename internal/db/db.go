@@ -19,8 +19,6 @@ type Database struct {
 const (
 	// IN_MEMORY, passed to New(), creates an in-memory database
 	IN_MEMORY = ":memory:"
-
-	DB_PATH = "./munchies.sqlite"
 )
 
 //go:embed sql

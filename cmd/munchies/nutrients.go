@@ -15,7 +15,7 @@ func makeNutrientsCommand() *cli.Command {
 		Aliases: []string{"n", "nuts"},
 		Usage:   "list nutrients",
 		Action: func(cCtx *cli.Context) error {
-			if cCtx.NArg() > 0 {
+			if cCtx.NArg() != 0 {
 				cli.ShowSubcommandHelpAndExit(cCtx, 1)
 			}
 
@@ -25,16 +25,16 @@ func makeNutrientsCommand() *cli.Command {
 }
 
 func doListNutrients() error {
-	dB, err := db.New(db.DB_PATH)
+	dB, err := db.New(getDbPath())
 	if err != nil {
 		log.Error().Err(err).Send()
-		return cli.Exit(fmt.Sprintf("Error opening database %q: %s.", db.DB_PATH, err), 1)
+		return cli.Exit(fmt.Sprintf("Error opening database %q: %s.", getDbPath(), err), 1)
 	}
 
 	var nuts db.Nutrients
 	if err := nuts.ReadFrom(dB); err != nil {
 		log.Error().Err(err).Send()
-		return cli.Exit(fmt.Sprintf("Error reading nutrients from database %q: %s.", db.DB_PATH, err), 1)
+		return cli.Exit(fmt.Sprintf("Error reading nutrients from database %q: %s.", getDbPath(), err), 1)
 
 	}
 

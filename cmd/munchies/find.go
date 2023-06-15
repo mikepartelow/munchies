@@ -10,7 +10,7 @@ func makeFindCommand() *cli.Command {
 		ArgsUsage:   "<search string>",
 		Description: "find lists nutrient details if there is only a single match, otherwise, it lists the names of all matching foods.",
 		Action: func(cCtx *cli.Context) error {
-			if cCtx.NArg() < 1 {
+			if cCtx.NArg() != 1 {
 				cli.ShowSubcommandHelpAndExit(cCtx, 1)
 			}
 

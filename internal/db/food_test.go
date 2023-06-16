@@ -1,80 +1,102 @@
 package db_test
 
-import "testing"
+import (
+	"mp/munchies/internal/db"
+	"testing"
+	"time"
 
-// func TestFood(t *testing.T) {
-// 	dB := mustInitDb(t)
-// 	defer dB.Close()
+	"github.com/stretchr/testify/assert"
+)
 
-// 	wantName := "butter"
-// 	wantNutrients := db.Nutrients{
-// 		{Name: "beta broccolitene"},
-// 		{Name: "sodium"},
-// 	}
+func TestFood(t *testing.T) {
+	dB := mustInitDb(t)
+	defer dB.Close()
 
-// 	err := db.Food{
-// 		Name:      wantName,
-// 		Nutrients: wantNutrients,
-// 	}.WriteTo(dB)
-// 	assert.NoError(t, err)
+	wantName := "butter"
+	wantNutrients := db.Nutrients{
+		{Record: db.Record{ID: 1}, Name: "beta broccolitene"},
+		{Record: db.Record{ID: 2}, Name: "sodium"},
+	}
 
-// 	var nut db.Food
-// 	err = nut.ReadFrom(dB)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, wantName, nut.Name)
-// 	assert.Equal(t, wantNutrients, nut.Nutrients)
-// }
+	err := db.Food{
+		Record:    db.Record{ID: 1},
+		Name:      wantName,
+		Nutrients: wantNutrients,
+	}.WriteTo(dB)
+	assert.NoError(t, err)
 
-// func TestFoods(t *testing.T) {
-// 	want := []struct {
-// 		Name      string
-// 		Nutrients db.Nutrients
-// 	}{
-// 		{
-// 			Name: "swamp gas",
-// 			Nutrients: db.Nutrients{
-// 				{Name: "beta broccolitene"},
-// 				{Name: "sodium"},
-// 			},
-// 		},
-// 		{
-// 			Name: "potatoes",
-// 			Nutrients: db.Nutrients{
-// 				{Name: "shells"},
-// 			},
-// 		},
+	var nut db.Food
+	err = nut.ReadFrom(dB)
+	assert.NoError(t, err)
+	assert.Equal(t, wantName, nut.Name)
+	assert.Equal(t,
+		scrubTimestamps(wantNutrients),
+		scrubTimestamps(nut.Nutrients))
+}
 
-// 		{
-// 			Name: "molybdenum",
-// 			Nutrients: db.Nutrients{
-// 				{Name: "iron"},
-// 				{Name: "cinnamon"},
-// 			},
-// 		},
-// 	}
+func TestFoods(t *testing.T) {
+	want := []struct {
+		ID        uint64
+		Name      string
+		Nutrients db.Nutrients
+	}{
+		{
+			ID:   1,
+			Name: "swamp gas",
+			Nutrients: db.Nutrients{
+				{Record: db.Record{ID: 1}, Name: "beta broccolitene"},
+				{Record: db.Record{ID: 2}, Name: "sodium"},
+			},
+		},
+		{
+			ID:   2,
+			Name: "potatoes",
+			Nutrients: db.Nutrients{
+				{Record: db.Record{ID: 3}, Name: "shells"},
+			},
+		},
+		{
+			ID:   3,
+			Name: "molybdenum",
+			Nutrients: db.Nutrients{
+				{Record: db.Record{ID: 4}, Name: "iron"},
+				{Record: db.Record{ID: 5}, Name: "cinnamon"},
+			},
+		},
+	}
 
-// 	dB := mustInitDb(t)
-// 	defer dB.Close()
+	dB := mustInitDb(t)
+	defer dB.Close()
 
-// 	for _, w := range want {
-// 		err := db.Food{
-// 			Name:      w.Name,
-// 			Nutrients: w.Nutrients,
-// 		}.WriteTo(dB)
-// 		assert.NoError(t, err)
-// 	}
+	for _, w := range want {
+		err := db.Food{
+			Record:    db.Record{ID: w.ID},
+			Name:      w.Name,
+			Nutrients: w.Nutrients,
+		}.WriteTo(dB)
+		assert.NoError(t, err)
+	}
 
-// 	var foods db.Foods
-// 	err := foods.ReadFrom(dB)
-// 	assert.NoError(t, err)
-// 	assert.Len(t, foods, 3)
+	var foods db.Foods
+	err := foods.ReadFrom(dB)
+	assert.NoError(t, err)
+	assert.Len(t, foods, 3)
 
-// 	for i := range want {
-// 		assert.Equal(t, want[i].Name, foods[i].Name)
-// 		assert.Equal(t, want[i].Nutrients, foods[i].Nutrients)
-// 	}
-// }
+	for i := range want {
+		assert.Equal(t, want[i].Name, foods[i].Name)
+		assert.Equal(t, scrubTimestamps(want[i].Nutrients), scrubTimestamps(foods[i].Nutrients))
+	}
+}
 
 func TestUniqueFoodName(t *testing.T) {
 	t.Skip("FIXME")
+}
+
+func scrubTimestamps(nuts db.Nutrients) db.Nutrients {
+	for i := range nuts {
+		nuts[i].CreatedAt = time.Time{}
+		nuts[i].UpdatedAt = time.Time{}
+	}
+
+	return nuts
 }

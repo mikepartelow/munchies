@@ -26,7 +26,7 @@ func TestRecord(t *testing.T) {
 	var unit db.Unit
 	err = unit.ReadFrom(dB)
 	assert.NoError(t, err)
-	assert.Equal(t, uint(2), unit.ID)
+	assert.Equal(t, uint64(2), unit.ID)
 	assert.Equal(t, wantName, unit.Name)
 	assert.True(t, prettyClose(unit.CreatedAt, time.Now().UTC()))
 	assert.True(t, prettyClose(unit.UpdatedAt, time.Now().UTC()))
@@ -34,7 +34,7 @@ func TestRecord(t *testing.T) {
 	var units db.Units
 	err = units.ReadFrom(dB)
 	assert.NoError(t, err)
-	assert.Equal(t, uint(2), units[0].ID)
+	assert.Equal(t, uint64(2), units[0].ID)
 	assert.Equal(t, wantName, units[0].Name)
 	assert.True(t, prettyClose(units[0].CreatedAt, time.Now().UTC()))
 	assert.True(t, prettyClose(units[0].UpdatedAt, time.Now().UTC()))

@@ -39,6 +39,7 @@ func mustInitDb(t *testing.T) *db.Database {
 	t.Helper()
 
 	dB, err := db.New(db.IN_MEMORY)
+	// dB, err := db.New("/tmp/test.db")
 	assert.NoError(t, err)
 	assert.NoError(t, dB.Migrate())
 

@@ -10,7 +10,7 @@ import (
 )
 
 type Record struct {
-	ID        uint
+	ID        uint64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -21,7 +21,7 @@ func (r Record) WriteThing(thing any, table string, db *Database) error {
 
 	name := reflect.ValueOf(thing).FieldByName("Name").String()
 	if id := reflect.ValueOf(thing).FieldByName("ID").Uint(); id != 0 {
-		sql := fmt.Sprintf("INSERT INTO %s(id,name) VALUES (?,?)", table)
+		sql := fmt.Sprintf("INSERT INTO %s (id,name) VALUES (?,?)", table)
 		result, err = db.db.Exec(sql, id, name)
 	} else {
 		sql := fmt.Sprintf("INSERT INTO %s (name) VALUES (?)", table)

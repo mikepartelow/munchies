@@ -3,7 +3,7 @@ name: Go package
 on: [push]
 
 jobs:
-  build:
+  the-pipes:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

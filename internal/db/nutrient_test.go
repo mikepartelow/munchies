@@ -50,3 +50,7 @@ func TestNutrients(t *testing.T) {
 		assert.Equal(t, names[i], nuts[i].Name)
 	}
 }
+
+func TestUniqueNutrientName(t *testing.T) {
+	t.Skip("FIXME")
+}

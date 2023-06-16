@@ -14,7 +14,8 @@ type Foods []Food
 
 func (u Food) WriteTo(db *Database) error {
 	// FIXME:
-	// nutrient.GetIdMap()
+	// foods have IDs and nutrients have IDs, so it should be real easy to write the given IDs - no need
+	// for any ID map or anything
 	// db.db.Begin()
 	// WriteThing(u)
 	// WriteThing(&FoodNutrient{idMap[nutrient]})

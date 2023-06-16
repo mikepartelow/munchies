@@ -2,6 +2,7 @@ package db_test
 
 import (
 	"mp/munchies/internal/db"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,11 +27,11 @@ func TestUnit(t *testing.T) {
 
 func TestUnits(t *testing.T) {
 	names := []string{
-		"truckload",
-		"planeload",
 		"boatload",
 		"megaparsec",
 		"nanometer",
+		"planeload",
+		"truckload",
 	}
 
 	dB := mustInitDb(t)
@@ -48,7 +49,15 @@ func TestUnits(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, units, 5)
 
+	sort.Slice(units, func(i, j int) bool {
+		return units[i].Name < units[j].Name
+	})
+
 	for i := range names {
 		assert.Equal(t, names[i], units[i].Name)
 	}
+}
+
+func TestUniqueUnitName(t *testing.T) {
+	t.Skip("FIXME")
 }

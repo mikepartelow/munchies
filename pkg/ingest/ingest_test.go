@@ -35,7 +35,6 @@ func TestIngest(t *testing.T) {
 	assert.ElementsMatch(t, wantNutrients, gotNutrients(t, i.DB))
 	assert.ElementsMatch(t, wantUnits, gotUnits(t, i.DB))
 	assert.ElementsMatch(t, wantFoods, gotFoods(t, i.DB))
-
 }
 
 func gotNutrients(t *testing.T, dB *db.Database) []string {

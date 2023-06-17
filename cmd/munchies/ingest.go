@@ -31,8 +31,9 @@ func doIngest(usdaJsonPath string) error {
 		log.Error().Err(err).Send()
 		return cli.Exit(fmt.Sprintf("Error ingesting USDA JSON files at %q: %s.", usdaJsonPath, err), 1)
 	}
+	defer i.DB.Close()
 
-	fmt.Printf("%d units\n%d nutrients.\n", len(i.Units), len(i.Nutrients))
+	fmt.Printf("%d units\n%d nutrients.\n", i.Units, i.Nutrients)
 
 	return nil
 }

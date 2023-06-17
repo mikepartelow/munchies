@@ -66,6 +66,10 @@ func (f *Foods) ReadFrom(db *Database) error {
 	return nil
 }
 
+func (f *Foods) Match(term string, db *Database) error {
+	return Record{}.MatchThing(f, FOODS_TABLE, db, term)
+}
+
 func writeFoodNutrient(food_id uint64, nutrient *Nutrient, db *Database) error {
 	if food_id == 0 || nutrient.ID == 0 {
 		return fmt.Errorf("got 0 food_id or nutrient_id: %d/%d", food_id, nutrient.ID)

@@ -35,11 +35,76 @@ func TestFood(t *testing.T) {
 }
 
 func TestFoods(t *testing.T) {
-	want := []struct {
-		ID        uint64
-		Name      string
-		Nutrients db.Nutrients
-	}{
+	wants, dB := makeFoods(t)
+	defer dB.Close()
+
+	var foods db.Foods
+	err := foods.ReadFrom(dB)
+	assert.NoError(t, err)
+	assert.Len(t, foods, 3)
+
+	for i := range wants {
+		assert.Equal(t, wants[i].Name, foods[i].Name)
+		assert.Equal(t, scrubTimestamps(wants[i].Nutrients), scrubTimestamps(foods[i].Nutrients))
+	}
+}
+
+func TestMatchOne(t *testing.T) {
+	wants, dB := makeFoods(t)
+	defer dB.Close()
+
+	for _, want := range wants {
+		var got db.Foods
+		assert.NoError(t, got.Match(want.Name, dB))
+		assert.Len(t, got, 1)
+		assert.Equal(t, want.Name, got[0].Name)
+
+		got = db.Foods{}
+		partial := want.Name[2 : len(want.Name)-2]
+		assert.NoError(t, got.Match(partial, dB))
+		assert.Len(t, got, 1)
+		assert.Equal(t, want.Name, got[0].Name)
+	}
+
+	var got db.Foods
+	assert.Error(t, got.Match("this is not in the db", dB))
+}
+
+func TestMatchSeveral(t *testing.T) {
+	wants, dB := makeFoods(t)
+	defer dB.Close()
+
+	var got db.Foods
+	assert.NoError(t, got.Match("a", dB))
+	assert.Len(t, got, 2)
+
+	assert.Equal(t, wants[0].Name, got[0].Name)
+	assert.Equal(t, wants[1].Name, got[1].Name)
+}
+
+func TestUniqueFoodName(t *testing.T) {
+	t.Skip("FIXME")
+}
+
+func scrubTimestamps(nuts db.Nutrients) db.Nutrients {
+	for i := range nuts {
+		nuts[i].CreatedAt = time.Time{}
+		nuts[i].UpdatedAt = time.Time{}
+	}
+
+	return nuts
+}
+
+type foodFixture struct {
+	ID        uint64
+	Name      string
+	Nutrients db.Nutrients
+}
+
+func makeFoods(t *testing.T) ([]foodFixture, *db.Database) {
+	t.Helper()
+
+	wants := []foodFixture{
 		{
 			ID:   1,
 			Name: "swamp gas",
@@ -66,9 +131,8 @@ func TestFoods(t *testing.T) {
 	}
 
 	dB := mustInitDb(t)
-	defer dB.Close()
 
-	for _, w := range want {
+	for _, w := range wants {
 		err := db.Food{
 			Record:    db.Record{ID: w.ID},
 			Name:      w.Name,
@@ -77,30 +141,5 @@ func TestFoods(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	var foods db.Foods
-	err := foods.ReadFrom(dB)
-	assert.NoError(t, err)
-	assert.Len(t, foods, 3)
-
-	for i := range want {
-		assert.Equal(t, want[i].Name, foods[i].Name)
-		assert.Equal(t, scrubTimestamps(want[i].Nutrients), scrubTimestamps(foods[i].Nutrients))
-	}
-}
-
-func TestFind(t *testing.T) {
-	t.Skip("FIXME")
-}
-
-func TestUniqueFoodName(t *testing.T) {
-	t.Skip("FIXME")
-}
-
-func scrubTimestamps(nuts db.Nutrients) db.Nutrients {
-	for i := range nuts {
-		nuts[i].CreatedAt = time.Time{}
-		nuts[i].UpdatedAt = time.Time{}
-	}
-
-	return nuts
+	return wants, dB
 }

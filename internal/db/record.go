@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -83,6 +84,26 @@ func (r Record) ReadThings(things interface{}, table string, db *Database) error
 	}
 	defer rows.Close()
 
+	return r.readThings(things, rows)
+}
+
+func (r Record) MatchThing(things interface{}, table string, db *Database, term string) error {
+	sql := fmt.Sprintf("SELECT id, name, created_at, updated_at FROM %s WHERE name LIKE ?", table)
+	rows, err := db.db.Query(sql, "%"+strings.ToLower(term)+"%")
+	if err != nil {
+		return fmt.Errorf("couldn't read thing: %w", err)
+	}
+	defer rows.Close()
+
+	err = r.readThings(things, rows)
+	if err == nil && reflect.ValueOf(things).Elem().Len() == 0 {
+		return fmt.Errorf("found 0 matches")
+	}
+
+	return err
+}
+
+func (r Record) readThings(things interface{}, rows *sql.Rows) error {
 	thingsSlice := reflect.ValueOf(things).Elem()
 	thingType := thingsSlice.Type().Elem()
 
@@ -91,7 +112,7 @@ func (r Record) ReadThings(things interface{}, table string, db *Database) error
 		var name string
 		var createdAt time.Time
 		var updatedAt time.Time
-		err = rows.Scan(&id, &name, &createdAt, &updatedAt)
+		err := rows.Scan(&id, &name, &createdAt, &updatedAt)
 		if err != nil {
 			return fmt.Errorf("couldn't scan thing: %w", err)
 		}

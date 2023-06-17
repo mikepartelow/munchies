@@ -34,6 +34,7 @@ func doMeal(mealPath string) error {
 		log.Error().Err(err).Send()
 		return cli.Exit(fmt.Sprintf("Error opening database %q: %s.", getDbPath(), err), 1)
 	}
+	defer dB.Close()
 
 	meal, err := meal.Read(mealPath, dB)
 	if err != nil {

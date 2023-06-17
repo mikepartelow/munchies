@@ -67,7 +67,7 @@ func TestMatchOne(t *testing.T) {
 	}
 
 	var got db.Foods
-	assert.Error(t, got.Match("this is not in the db", dB))
+	assert.Equal(t, db.NoMatch, got.Match("this is not in the db", dB))
 }
 
 func TestMatchSeveral(t *testing.T) {

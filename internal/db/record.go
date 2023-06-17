@@ -97,7 +97,7 @@ func (r Record) MatchThing(things interface{}, table string, db *Database, term 
 
 	err = r.readThings(things, rows)
 	if err == nil && reflect.ValueOf(things).Elem().Len() == 0 {
-		return fmt.Errorf("found 0 matches")
+		return NoMatch
 	}
 
 	return err

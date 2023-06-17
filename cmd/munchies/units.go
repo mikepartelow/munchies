@@ -30,6 +30,7 @@ func doListUnits() error {
 		log.Error().Err(err).Send()
 		return cli.Exit(fmt.Sprintf("Error opening database %q: %s.", getDbPath(), err), 1)
 	}
+	defer dB.Close()
 
 	var units db.Units
 	if err := units.ReadFrom(dB); err != nil {

@@ -123,7 +123,8 @@ func doNutrient(fnut food.FoodNutrient, nutrients nutrientSet, dB *db.Database) 
 func doFood(food food.Food, foods foodSet, dB *db.Database) error {
 	name := food.Description
 	if _, ok := foods[name]; ok {
-		return fmt.Errorf("Duplicate food %q", name)
+		log.Warn().Msgf("found duplicate food %q", name)
+		return nil
 	}
 	if err := (db.Food{
 		Name: strings.TrimSpace(name),

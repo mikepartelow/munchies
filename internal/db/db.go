@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"path"
 	"sort"
@@ -20,6 +21,8 @@ const (
 	// IN_MEMORY, passed to New(), creates an in-memory database
 	IN_MEMORY = ":memory:"
 )
+
+var NoMatch = errors.New("no match")
 
 //go:embed sql
 var sqlFs embed.FS

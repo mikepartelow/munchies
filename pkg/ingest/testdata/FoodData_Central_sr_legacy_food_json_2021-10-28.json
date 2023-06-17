@@ -3,6 +3,7 @@
     {
       "foodClass": "FinalFood",
       "description": "Pillsbury Golden Layer Buttermilk Biscuits, Artificial Flavor, refrigerated dough",
+      "fdcId": 167512,
       "foodNutrients": [
         {
           "type": "FoodNutrient",

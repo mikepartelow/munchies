@@ -8,6 +8,7 @@ import (
 type Foods []Food
 
 type Food struct {
+	ID            uint64         `json:"fdcId"`
 	FoodClass     string         `json:"foodClass"`
 	Description   string         `json:"description"`
 	FoodNutrients []FoodNutrient `json:"foodNutrients"`

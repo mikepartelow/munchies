@@ -3,6 +3,7 @@
     {
       "foodClass": "FinalFood",
       "description": "Hummus, commercial",
+      "fdcId": 321358,
       "foodNutrients": [
         {
           "type": "FoodNutrient",

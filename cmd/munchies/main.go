@@ -17,7 +17,9 @@ const (
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
-	// zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if level, err := zerolog.ParseLevel(os.Getenv("LOG_LEVEL")); err == nil {
+		zerolog.SetGlobalLevel(level)
+	}
 
 	app := &cli.App{
 		Name:  "munchies",

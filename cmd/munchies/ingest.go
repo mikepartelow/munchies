@@ -33,7 +33,7 @@ func doIngest(usdaJsonPath string) error {
 	}
 	defer i.DB.Close()
 
-	fmt.Printf("%d units\n%d nutrients.\n", i.Units, i.Nutrients)
+	fmt.Printf("%d units\n%d nutrients\n%d foods.\n", i.Units, i.Nutrients, i.Foods)
 
 	return nil
 }

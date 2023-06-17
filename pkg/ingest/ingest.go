@@ -109,6 +109,9 @@ func doNutrient(fnut food.FoodNutrient, nutrients nutrientSet, dB *db.Database) 
 	name := fnut.Nutrient.Name
 	if _, ok := nutrients[name]; !ok {
 		if err := (db.Nutrient{
+			Record: db.Record{
+				ID: fnut.Nutrient.ID,
+			},
 			Name: strings.TrimSpace(name),
 		}.WriteTo(dB)); err != nil {
 			log.Error().Err(err).Send()
@@ -126,11 +129,26 @@ func doFood(food food.Food, foods foodSet, dB *db.Database) error {
 		log.Warn().Msgf("found duplicate food %q", name)
 		return nil
 	}
+
+	nutrients := make(db.Nutrients, len(food.FoodNutrients))
+	for i := range food.FoodNutrients {
+		nutrients[i] = db.Nutrient{
+			Record: db.Record{
+				ID: food.FoodNutrients[i].Nutrient.ID,
+			},
+			Name: food.FoodNutrients[i].Nutrient.Name,
+		}
+	}
+
 	if err := (db.Food{
-		Name: strings.TrimSpace(name),
+		Record: db.Record{
+			ID: food.ID,
+		},
+		Name:      strings.TrimSpace(name),
+		Nutrients: nutrients,
 	}.WriteTo(dB)); err != nil {
 		log.Error().Err(err).Send()
-		return fmt.Errorf("Error writing food %q to database: %w", name, err)
+		return fmt.Errorf("Error writing food %#v to database: %w", food, err)
 	}
 	foods[name] = struct{}{}
 

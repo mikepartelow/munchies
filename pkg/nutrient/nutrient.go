@@ -3,7 +3,7 @@ package nutrient
 import "strings"
 
 type Nutrient struct {
-	Id       int    `json:"id"`
+	ID       uint64 `json:"id"`
 	Name     string `json:"name"`
 	UnitName string `json:"unitName"`
 }

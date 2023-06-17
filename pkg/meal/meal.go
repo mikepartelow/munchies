@@ -31,11 +31,11 @@ func (m *Meal) FoodNutrients() []food.FoodNutrient {
 	//    - use Atwater General/Specific for Energy as needed (like in Oats, whole grain, rolled, old fashioned)
 	//  - filter out the rest (optionally)
 	if m.foodNutrients == nil {
-		fnset := make(map[int]food.FoodNutrient)
+		fnset := make(map[uint64]food.FoodNutrient)
 
 		for _, p := range m.Portions {
 			for _, pffn := range p.Food.FoodNutrients {
-				id := pffn.Nutrient.Id
+				id := pffn.Nutrient.ID
 				pffn.Amount *= scale(convert(p))
 				if fn, ok := fnset[id]; ok {
 					fn.Amount += pffn.Amount

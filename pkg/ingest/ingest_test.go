@@ -37,6 +37,24 @@ func TestIngest(t *testing.T) {
 	assert.ElementsMatch(t, wantFoods, gotFoods(t, i.DB))
 }
 
+func TestIngestRelations(t *testing.T) {
+	i, err := ingest.New("testdata", db.IN_MEMORY)
+	assert.NoError(t, err)
+	defer i.DB.Close()
+
+	var food db.Food
+	assert.NoError(t, food.ReadFrom(i.DB))
+	assert.NotEmpty(t, food.Nutrients)
+
+	var foods db.Foods
+	assert.NoError(t, foods.ReadFrom(i.DB))
+	assert.NotEmpty(t, foods)
+	for _, food := range foods {
+		assert.NotEmpty(t, food.Nutrients)
+	}
+
+}
+
 func gotNutrients(t *testing.T, dB *db.Database) []string {
 	var gotNutrients db.Nutrients
 	assert.NoError(t, gotNutrients.ReadFrom(dB))

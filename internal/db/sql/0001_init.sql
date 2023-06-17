@@ -22,6 +22,6 @@ CREATE TABLE foods (
 CREATE TABLE foods_nutrients (
     food_id INTEGER NOT NULL,
     nutrient_id INTEGER NOT NULL,
-    FOREIGN KEY(food_id) REFERENCES foods(id)
+    FOREIGN KEY(food_id) REFERENCES foods(id),
     FOREIGN KEY(nutrient_id) REFERENCES nutrients(id)
 )

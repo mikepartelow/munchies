@@ -67,7 +67,20 @@ func (f *Foods) ReadFrom(db *Database) error {
 }
 
 func (f *Foods) Match(term string, db *Database) error {
-	return Record{}.MatchThing(f, FOODS_TABLE, db, term)
+	if err := (Record{}.MatchThing(f, FOODS_TABLE, db, term)); err != nil {
+		return err
+	}
+
+	for i := range *f {
+		nuts, err := readFoodNutrients((*f)[i].ID, db)
+		if err != nil {
+			return err
+		}
+
+		(*f)[i].Nutrients = nuts
+	}
+
+	return nil
 }
 
 func writeFoodNutrient(food_id uint64, nutrient *Nutrient, db *Database) error {
@@ -77,7 +90,7 @@ func writeFoodNutrient(food_id uint64, nutrient *Nutrient, db *Database) error {
 	var result sql.Result
 	var err error
 
-	sql := "INSERT INTO nutrients (id,name) VALUES (?,?)"
+	sql := "INSERT OR IGNORE INTO nutrients (id,name) VALUES (?,?)"
 	_, err = db.db.Exec(sql, nutrient.ID, nutrient.Name)
 	if err != nil {
 		return fmt.Errorf("couldn't insert nutrient %d/%q: %w", nutrient.ID, nutrient.Name, err)

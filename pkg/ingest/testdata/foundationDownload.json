@@ -1,0 +1,34 @@
+{
+  "FoundationFoods": [
+    {
+      "foodClass": "FinalFood",
+      "description": "Hummus, commercial",
+      "foodNutrients": [
+        {
+          "type": "FoodNutrient",
+          "id": 13338412,
+          "nutrient": {
+            "id": 2048,
+            "number": "958",
+            "name": "Energy",
+            "unitName": "kcal"
+          },
+          "amount": 229
+        },
+        {
+          "type": "FoodNutrient",
+          "id": 2219707,
+          "nutrient": {
+            "id": 1120,
+            "number": "334",
+            "name": "Cryptoxanthin, beta",
+            "rank": 7460,
+            "unitName": "µg"
+          },
+          "median": 3,
+          "amount": 3
+        }
+      ]
+    }
+  ]
+}

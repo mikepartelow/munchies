@@ -88,6 +88,10 @@ func TestFoods(t *testing.T) {
 	}
 }
 
+func TestFind(t *testing.T) {
+	t.Skip("FIXME")
+}
+
 func TestUniqueFoodName(t *testing.T) {
 	t.Skip("FIXME")
 }

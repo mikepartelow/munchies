@@ -6,22 +6,24 @@ import (
 	"mp/munchies/pkg/food"
 	"mp/munchies/pkg/usda"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 )
 
 type Ingest struct {
-	// A sorted slice of units
-	Units []string
+	// A database full of freshly ingested data. Caller must call Close()
+	DB *db.Database
 
-	// A sorted slice of nutrients
-	Nutrients []string
+	// A count of injested units
+	Units int
+
+	// A count of injested nutrients
+	Nutrients int
+
+	// A count of injested foods
+	Foods int
 }
-
-type unitSet map[string]struct{}
-type nutrientSet map[string]struct{}
 
 func New(usdaJsonPath, dbPath string) (*Ingest, error) {
 	foods, err := usda.MustRead(usdaJsonPath)
@@ -29,6 +31,22 @@ func New(usdaJsonPath, dbPath string) (*Ingest, error) {
 		log.Error().Err(err).Send()
 		return nil, fmt.Errorf("Error reading USDA JSON files at %q: %w", usdaJsonPath, err)
 	}
+
+	dB, err := doRecreateDb(dbPath)
+	if err != nil {
+		return nil, fmt.Errorf("Error rereating database %q: %w", dbPath, err)
+	}
+	// caller must call dB.Close()
+
+	i, err := doLoadData(dB, foods)
+	if err != nil {
+		return nil, fmt.Errorf("Error loading data to %q: %w", dbPath, err)
+	}
+
+	return i, nil
+}
+
+func doRecreateDb(dbPath string) (*db.Database, error) {
 	_ = os.RemoveAll(dbPath)
 	dB, err := db.New(dbPath)
 	if err != nil {
@@ -39,41 +57,36 @@ func New(usdaJsonPath, dbPath string) (*Ingest, error) {
 		log.Error().Err(err).Send()
 		return nil, fmt.Errorf("Error migrating database %q: %w", dbPath, err)
 	}
-	defer dB.Close()
 
-	unitSet, nutrientSet := make(unitSet), make(nutrientSet)
+	return dB, nil
+}
+
+type unitSet map[string]struct{}
+type nutrientSet map[string]struct{}
+type foodSet map[string]struct{}
+
+func doLoadData(dB *db.Database, foods food.Foods) (*Ingest, error) {
+	unitSet, nutrientSet, foodSet := make(unitSet), make(nutrientSet), make(foodSet)
+
 	for _, food := range foods {
 		for _, fnut := range food.FoodNutrients {
-			if err = doUnit(fnut, unitSet, dB); err != nil {
+			if err := doUnit(fnut, unitSet, dB); err != nil {
 				return nil, err
 			}
-			if err = doNutrient(fnut, nutrientSet, dB); err != nil {
+			if err := doNutrient(fnut, nutrientSet, dB); err != nil {
 				return nil, err
 			}
 		}
+		if err := doFood(food, foodSet, dB); err != nil {
+			return nil, err
+		}
 	}
-
-	units, i := make([]string, len(unitSet)), 0
-	for u := range unitSet {
-		units[i] = u
-		i++
-	}
-	sort.Slice(units, func(i, j int) bool {
-		return units[i] < units[j]
-	})
-
-	nutrients, i := make([]string, len(nutrientSet)), 0
-	for n := range nutrientSet {
-		nutrients[i] = n
-		i++
-	}
-	sort.Slice(nutrients, func(i, j int) bool {
-		return nutrients[i] < nutrients[j]
-	})
 
 	return &Ingest{
-		Units:     units,
-		Nutrients: nutrients,
+		DB:        dB,
+		Units:     len(unitSet),
+		Nutrients: len(nutrientSet),
+		Foods:     len(foodSet),
 	}, nil
 }
 
@@ -99,10 +112,26 @@ func doNutrient(fnut food.FoodNutrient, nutrients nutrientSet, dB *db.Database) 
 			Name: strings.TrimSpace(name),
 		}.WriteTo(dB)); err != nil {
 			log.Error().Err(err).Send()
-			return fmt.Errorf("Error writing unit %q to database: %w", name, err)
+			return fmt.Errorf("Error writing nutrient %q to database: %w", name, err)
 		}
 		nutrients[name] = struct{}{}
 	}
+
+	return nil
+}
+
+func doFood(food food.Food, foods foodSet, dB *db.Database) error {
+	name := food.Description
+	if _, ok := foods[name]; ok {
+		return fmt.Errorf("Duplicate food %q", name)
+	}
+	if err := (db.Food{
+		Name: strings.TrimSpace(name),
+	}.WriteTo(dB)); err != nil {
+		log.Error().Err(err).Send()
+		return fmt.Errorf("Error writing food %q to database: %w", name, err)
+	}
+	foods[name] = struct{}{}
 
 	return nil
 }
